@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mini Connections Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Georgia', serif;
+      background: #f0ebe3;
+      color: #2e3c40;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 { margin-bottom: 10px; color: #556b6f; }
+    #instructions { max-width: 500px; margin: 0 auto 20px; font-size: 1rem; color: #5e676c; }
+    #streak, #mistakes { font-size: 1.2em; color: #6b7a80; margin-bottom: 10px; }
+    #mistakes { color: #ff6f61; }
+    #game { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; max-width: 360px; margin: 20px auto; }
+    .tile {
+      background: #fff; border: 2px solid #ccc; padding: 15px;
+      font-size: 20px; cursor: pointer; border-radius: 8px;
+      transition: background 0.3s, border-color 0.3s;
+      color: #374747; display: flex; align-items: center;
+      justify-content: center; text-align: center; height: 80px;
+      white-space: normal; overflow: hidden; word-wrap: break-word;
+    }
+    .tile.selected { background: #d6dbd2; border-color: #a1a9a5; }
+    .tile.grouped { cursor: default; }
+    #message { font-size: 1.2em; margin-top: 20px; color: #54686d; }
+    #categoryLabels { margin-top: 10px; font-size: 1em; color: #6b7a80; }
+    .category-label { margin: 5px 0; }
+    button { margin-top: 20px; padding: 10px 20px; font-size: 16px; background: #8fa6a0; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    button:hover { background: #728985; }
+  </style>
+</head>
+<body>
+  <h1>Mini Connections Game</h1>
+  <div id="instructions">
+    Select 3 related words to form a group. There are 3 groups: easy, medium, and hard. You have 3 mistakes per puzzle.
+  </div>
+  <div id="streak">Current Streak: <span id="streakCount">0</span></div>
+  <div id="mistakes">Mistakes Remaining: <span id="mistakesCount">3</span></div>
+  <div id="game"></div>
+  <div id="message"></div>
+  <div id="categoryLabels"></div>
+  <button id="newPuzzleBtn">New Puzzle</button>
+  <p></p>
+  <a href="scratch.html" class="nav-button">Back to Scratch Page</a>
+
+  <script>
+    const allCategoryOptions = [
+      [
+        { name: "Primary Colors", words: ["Red", "Blue", "Yellow"], key: "easy", color: "#dbeadf" },
+        { name: "Shakespeare Plays", words: ["Hamlet", "Othello", "Macbeth"], key: "medium", color: "#ffe8d1" },
+        { name: "Types of Clouds", words: ["Cumulus", "Stratus", "Cirrus"], key: "hard", color: "#ffdede" }
+      ],
+      [
+        { name: "Fruits", words: ["Apple", "Banana", "Orange"], key: "easy", color: "#dbeadf" },
+        { name: "Nobel Prize Categories", words: ["Peace", "Literature", "Physics"], key: "medium", color: "#ffe8d1" },
+        { name: "Greek Letters", words: ["Alpha", "Beta", "Gamma"], key: "hard", color: "#ffdede" }
+      ],
+      [
+        { name: "Seasons", words: ["Spring", "Summer", "Winter"], key: "easy", color: "#dbeadf" },
+        { name: "World Capitals", words: ["Paris", "Tokyo", "Ottawa"], key: "medium", color: "#ffe8d1" },
+        { name: "Types of Poems", words: ["Haiku", "Sonnet", "Limerick"], key: "hard", color: "#ffdede" }
+      ],
+      [
+        { name: "Insects", words: ["Bee", "Ant", "Fly"], key: "easy", color: "#dbeadf" },
+        { name: "Space Terms", words: ["Nebula", "Galaxy", "Quasar"], key: "medium", color: "#ffe8d1" },
+        { name: "Math Operations", words: ["Addition", "Subtraction", "Multiplication"], key: "hard", color: "#ffdede" }
+      ],
+      [
+        { name: "Days of the Week", words: ["Monday", "Tuesday", "Friday"], key: "easy", color: "#dbeadf" },
+        { name: "Ocean Animals", words: ["Dolphin", "Octopus", "Shark"], key: "medium", color: "#ffe8d1" },
+        { name: "Classic Novels", words: ["1984", "Ulysses", "Frankenstein"], key: "hard", color: "#ffdede" }
+      ],
+      [
+        { name: "Musical Instruments", words: ["Violin", "Drum", "Flute"], key: "easy", color: "#dbeadf" },
+        { name: "Elements", words: ["Hydrogen", "Oxygen", "Carbon"], key: "medium", color: "#ffe8d1" },
+        { name: "Programming Languages", words: ["Python", "Java", "Ruby"], key: "hard", color: "#ffdede" }
+      ],
+      [
+        { name: "Vegetables", words: ["Carrot", "Spinach", "Potato"], key: "easy", color: "#dbeadf" },
+        { name: "Currencies", words: ["Dollar", "Euro", "Yen"], key: "medium", color: "#ffe8d1" },
+        { name: "Ancient Civilizations", words: ["Maya", "Egyptian", "Roman"], key: "hard", color: "#ffdede" }
+      ],
+      [
+        { name: "Body Parts", words: ["Arm", "Leg", "Head"], key: "easy", color: "#dbeadf" },
+        { name: "Trees", words: ["Oak", "Maple", "Pine"], key: "medium", color: "#ffe8d1" },
+        { name: "Constellations", words: ["Orion", "Lyra", "Draco"], key: "hard", color: "#ffdede" }
+      ],
+      [
+        { name: "Birds", words: ["Sparrow", "Robin", "Owl"], key: "easy", color: "#dbeadf" },
+        { name: "Computer Parts", words: ["Monitor", "Keyboard", "Mouse"], key: "medium", color: "#ffe8d1" },
+        { name: "Mythical Creatures", words: ["Dragon", "Unicorn", "Griffin"], key: "hard", color: "#ffdede" }
+      ],
+      [
+        { name: "Pets", words: ["Dog", "Cat", "Fish"], key: "easy", color: "#dbeadf" },
+        { name: "Planets", words: ["Mars", "Venus", "Jupiter"], key: "medium", color: "#ffe8d1" },
+        { name: "Philosophers", words: ["Plato", "Socrates", "Aristotle"], key: "hard", color: "#ffdede" }
+      ]
+    ];
+
+    let puzzleOrder = shuffle([...Array(10).keys()]);
+    let categories, words, selected, groupedWords, streak, mistakesLeft, gameOver;
+
+    function shuffle(arr) { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
+
+    function initializeGame() {
+      if (puzzleOrder.length === 0) { document.getElementById('message').textContent = 'No more puzzles!'; return; }
+      resetState();
+      const idx = puzzleOrder.shift();
+      categories = allCategoryOptions[idx];
+      words = shuffle(categories.flatMap(c => c.words));
+      const game = document.getElementById('game'); game.innerHTML = '';
+      words.forEach(w => { const d = document.createElement('div'); d.className='tile'; d.textContent=w; d.onclick=() => selectWord(d,w); game.appendChild(d); });
+      adjustFont();
+      document.getElementById('categoryLabels').innerHTML = '';
+    }
+
+    function adjustFont() { document.querySelectorAll('.tile').forEach(tile => { let fs = 24; tile.style.fontSize = fs + 'px'; while (tile.scrollHeight > tile.clientHeight || tile.scrollWidth > tile.clientWidth) { fs--; tile.style.fontSize = fs + 'px'; if (fs <= 10) break; } }); }
+
+    function resetState() {
+      selected=[]; groupedWords=new Set(); mistakesLeft=3; gameOver=false;
+      document.getElementById('streakCount').textContent=streak;
+      document.getElementById('mistakesCount').textContent=mistakesLeft;
+      document.getElementById('message').textContent='';
+    }
+
+    function selectWord(div, word) {
+      if(gameOver||div.classList.contains('grouped')) return;
+      if(selected.includes(word)){ div.classList.remove('selected'); selected=selected.filter(x=>x!==word); }
+      else if(selected.length<3){ div.classList.add('selected'); selected.push(word); if(selected.length===3) setTimeout(checkGroup,200); }
+    }
+
+    function checkGroup() {
+      let correct=false;
+      categories.forEach(cat => { if(cat.words.every(w=>selected.includes(w))) correct=true; });
+      if(correct){
+        let matchedCat = categories.find(cat=>cat.words.every(w=>selected.includes(w)));
+        document.getElementById('message').textContent=`Group: ${matchedCat.name}`;
+        document.querySelectorAll('.tile.selected').forEach(t=>{
+          t.classList.remove('selected');
+          t.classList.add('grouped');
+          t.style.backgroundColor = matchedCat.color;
+          groupedWords.add(t.textContent);
+        });
+        const label = document.createElement('div');
+        label.className = 'category-label';
+        label.style.color = '#333';
+        label.textContent = matchedCat.name;
+        label.style.backgroundColor = matchedCat.color;
+        label.style.borderRadius = '5px';
+        label.style.padding = '5px';
+        document.getElementById('categoryLabels').appendChild(label);
+        selected=[];
+      }
+      else{
+        mistakesLeft--;
+        document.getElementById('mistakesCount').textContent=mistakesLeft;
+        document.getElementById('message').textContent='Wrong!';
+        document.querySelectorAll('.tile.selected').forEach(t=>t.classList.remove('selected'));
+        selected=[];
+        if(mistakesLeft===0){
+          gameOver=true;
+          streak=0;
+          document.getElementById('streakCount').textContent=streak;
+          document.getElementById('message').textContent='Mistakes up! Streak reset.';
+        }
+      }
+      if(groupedWords.size===9){
+        gameOver=true;
+        streak++;
+        document.getElementById('streakCount').textContent=streak;
+        document.getElementById('message').textContent='All groups found!';
+      }
+    }
+
+    document.getElementById('newPuzzleBtn').onclick=initializeGame;
+    streak=0; initializeGame();
+  </script>
+</body>
+</html>

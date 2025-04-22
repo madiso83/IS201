@@ -1,0 +1,62 @@
+.common{
+    font-family:Georgia, 'Times New Roman', Times, serif;
+    text-align: center;
+}
+
+.header{
+    
+    background-color: #6b8e8c;
+    color: white;
+    height: 100 px;
+    line-height: 100 px
+}
+
+.mainbody{
+    text-align:left;
+    background-color: #f8f6f1;
+}
+
+.footer{
+    position:relative;
+    background-color: lightgray;
+    color: white;
+    bottom: 0 px;
+    left: 5 px;
+    right: 5 px;
+    height: 50 px;
+    line-height: 50 px;
+}
+
+img{
+    width: 25%;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+nav{
+    background-color:lightgray;
+    padding: 10px;
+    overflow:hidden;
+}
+
+nav a{
+    color: black;
+    text-decoration: none;
+    padding: 15px;
+    font-weight: bold;
+}
+
+nav a:hover{
+    background-color: #ccc;
+}
+
+#tableauViz{
+    width: 75%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.emphasizedtext{
+    font-style: bold;
+    text-decoration: underline;
+}
